@@ -19,9 +19,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -76,6 +78,22 @@ public class AuthController {
         }
     }
 
+        @GetMapping("/login")
+        @Operation(summary = "User login (GET)", description = "Authenticate user and get JWT token using query parameters. NOTE: For security, POST with JSON body is recommended.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Login successful",
+                                        content = @Content(mediaType = "application/json",
+                                                        schema = @Schema(implementation = TokenResponse.class))),
+                        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+                        @ApiResponse(responseCode = "400", description = "Bad request")
+        })
+        public ResponseEntity<?> loginGet(@RequestParam String username, @RequestParam String password) {
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setUsername(username);
+                loginRequest.setPassword(password);
+                return login(loginRequest);
+        }
+
     @PostMapping("/signup")
     @Operation(summary = "User signup", description = "Register a new user")
     @ApiResponses(value = {
@@ -104,4 +122,17 @@ public class AuthController {
                     .body("{\"error\": \"Could not register user\"}");
         }
     }
+
+        @GetMapping("/signup")
+        @Operation(summary = "User signup (GET)", description = "Register a new user using query parameters. NOTE: For security, POST with JSON body is recommended.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "User registered successfully"),
+                        @ApiResponse(responseCode = "400", description = "Bad request")
+        })
+        public ResponseEntity<?> signupGet(@RequestParam String username, @RequestParam String password) {
+                LoginRequest signupRequest = new LoginRequest();
+                signupRequest.setUsername(username);
+                signupRequest.setPassword(password);
+                return signup(signupRequest);
+        }
 }
