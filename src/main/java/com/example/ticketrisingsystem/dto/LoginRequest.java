@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Login request payload")
 public class LoginRequest {
 
-    @Schema(description = "Username", example = "admin")
+    @Schema(description = "Username", example = "admin", requiredMode = Schema.RequiredMode.REQUIRED, minLength = 1)
     private String username;
 
-    @Schema(description = "Password", example = "admin123")
+    @Schema(description = "Password", example = "admin123", requiredMode = Schema.RequiredMode.REQUIRED, minLength = 1)
     private String password;
 }
