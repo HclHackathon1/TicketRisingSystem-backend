@@ -59,11 +59,38 @@ public class TicketService {
     }
 
     @Transactional
-    public Ticket resolveTicket(Long ticketId, String resolutionNote, String changedBy) {
+    public Ticket startTicket(Long ticketId, String changedBy) {
         Ticket ticket = getTicket(ticketId);
         if (ticket.getStatus() != TicketStatus.ASSIGNED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Ticket can be resolved only from ASSIGNED status");
+                    "Ticket can be started only from ASSIGNED status");
+        }
+
+        if (ticket.getAssignedTo() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot start ticket without an assignee");
+        }
+
+        // Only assignee or admin (by username convention) can start. We don't have roles here,
+        // so we enforce assignee ownership and let controllers enforce ROLE_ADMIN/ROLE_USER.
+        if (!ticket.getAssignedTo().getUsername().equals(changedBy)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the assignee can start working on this ticket");
+        }
+
+        TicketStatus from = ticket.getStatus();
+        ticket.setStatus(TicketStatus.IN_PROGRESS);
+        Ticket saved = ticketRepository.save(ticket);
+        recordTransition(saved, from, TicketStatus.IN_PROGRESS, changedBy, "Work started");
+        return saved;
+    }
+
+    @Transactional
+    public Ticket resolveTicket(Long ticketId, String resolutionNote, String changedBy) {
+        Ticket ticket = getTicket(ticketId);
+        if (ticket.getStatus() != TicketStatus.ASSIGNED && ticket.getStatus() != TicketStatus.IN_PROGRESS) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ticket can be resolved only from ASSIGNED or IN_PROGRESS status");
         }
 
         TicketStatus from = ticket.getStatus();
