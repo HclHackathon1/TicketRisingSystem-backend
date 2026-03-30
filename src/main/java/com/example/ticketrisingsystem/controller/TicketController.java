@@ -58,6 +58,14 @@ public class TicketController {
                 .toList();
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete ticket", description = "Delete an OPEN ticket owned by the logged-in user")
+    public ResponseEntity<Void> deleteTicket(@PathVariable Long id, Authentication authentication) {
+        String username = authentication.getName();
+        ticketService.deleteUserTicket(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/assign")
     @Operation(summary = "Assign a ticket (ADMIN only)")
     public TicketResponse assign(@PathVariable Long id,
@@ -108,4 +116,3 @@ public class TicketController {
         return false;
     }
 }
-

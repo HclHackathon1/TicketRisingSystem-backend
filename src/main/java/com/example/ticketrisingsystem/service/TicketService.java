@@ -132,9 +132,30 @@ public class TicketService {
         return ticketRepository.findAll();
     }
 
+    @Transactional
+    public void deleteUserTicket(Long ticketId, String username) {
+        Ticket ticket = getTicket(ticketId);
+        validateTicketOwner(ticket, username);
+
+        if (ticket.getStatus() != TicketStatus.OPEN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Only OPEN tickets can be deleted");
+        }
+
+        transitionRepository.deleteByTicketId(ticketId);
+        ticketRepository.delete(ticket);
+    }
+
     @Transactional(readOnly = true)
     public List<TicketStatusTransition> getTransitions(Long ticketId) {
         return transitionRepository.findByTicketIdOrderByChangedAtAsc(ticketId);
+    }
+
+    private void validateTicketOwner(Ticket ticket, String username) {
+        if (!username.equals(ticket.getCreatedBy())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You can only access your own tickets");
+        }
     }
 
     private void recordTransition(Ticket ticket, TicketStatus from, TicketStatus to, String changedBy, String note) {

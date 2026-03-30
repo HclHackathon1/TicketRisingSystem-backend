@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TicketStatusTransitionRepository extends JpaRepository<TicketStatusTransition, Long> {
     List<TicketStatusTransition> findByTicketIdOrderByChangedAtAsc(Long ticketId);
+
+    void deleteByTicketId(Long ticketId);
 }

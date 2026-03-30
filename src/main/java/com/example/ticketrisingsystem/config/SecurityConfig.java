@@ -123,6 +123,13 @@ public class SecurityConfig {
 						.requestMatchers("/api/tickets/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
 
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/tickets/health").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
+
+                        // User ticket delete endpoint
+                        .requestMatchers(HttpMethod.DELETE, "/api/tickets/*").authenticated()
+
                         // Admin endpoints
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
 
