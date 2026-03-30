@@ -2,7 +2,10 @@ package com.example.ticketrisingsystem.service;
 
 import com.example.ticketrisingsystem.entity.Ticket;
 import com.example.ticketrisingsystem.entity.TicketStatus;
+import com.example.ticketrisingsystem.model.User;
 import com.example.ticketrisingsystem.repository.TicketStatusTransitionRepository;
+import com.example.ticketrisingsystem.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +25,25 @@ class TicketServiceTest {
 
     @Autowired
     private TicketStatusTransitionRepository transitionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void seedUsers() {
+        // TicketService requires the assignee to exist.
+        userRepository.findByUsername("admin").orElseGet(() -> userRepository.save(User.builder()
+                .username("admin")
+                .password("password")
+                .role(User.Role.ADMIN)
+                .build()));
+
+        userRepository.findByUsername("user").orElseGet(() -> userRepository.save(User.builder()
+                .username("user")
+                .password("password")
+                .role(User.Role.USER)
+                .build()));
+    }
 
     @Test
     void raiseTicket_shouldCreateOpenTicket() {
@@ -43,7 +65,8 @@ class TicketServiceTest {
 
         Ticket assigned = ticketService.assignTicket(ticket.getId(), "admin", "admin", true);
         assertEquals(TicketStatus.ASSIGNED, assigned.getStatus());
-        assertEquals("admin", assigned.getAssignedTo());
+        assertNotNull(assigned.getAssignedTo());
+        assertEquals("admin", assigned.getAssignedTo().getUsername());
     }
 
     @Test

@@ -120,12 +120,12 @@ public class SecurityConfig {
                     .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-        				.requestMatchers("/api/tickets/health").permitAll()
+						.requestMatchers("/api/tickets/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
-                        
+
                         // Admin endpoints
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-                        
+
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 );
